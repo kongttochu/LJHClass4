@@ -37,6 +37,13 @@ namespace LJHHomework2.Controllers
             return Json(jsonData);
         }
 
+        public JsonResult GetStoreDetailJoin(int storeId)
+        {
+            DataFromDB data = new DataFromDB();
+            string jsonData = JsonConvert.SerializeObject(data.GetStoreJoin(storeId));
+            return Json(jsonData);
+        }
+
         [HttpGet] // 속성 : get일때만 속성
         public ContentResult JsonpCall(string callback) // getFoodDetail
         {

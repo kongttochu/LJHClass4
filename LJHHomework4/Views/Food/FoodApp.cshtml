@@ -20,12 +20,6 @@
         }
     </style>
     <script>
-
-            //var _foodstorelist = '@Html.Raw(ViewBag.foodAppData)'
-            var _foodstorelist =
-            {"한식":{"원할머니보쌈":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"보쌈":10000,"족발":10000,"보족":10000}},"BBQ":{"tip":2000,"minTime":20,"maxTime":50,"score":5,"food":{"후라이드":10000,"양념":10000,"간장":10000}},"신전떡볶이":{"tip":2000,"minTime":30,"maxTime":40,"score":5,"food":{"떡볶이":10000,"오뎅":10000,"튀김":10000}}},"중식":{"홍콩반점":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"짜장":10000,"짬뽕":10000,"탕수육":10000}},"짜장면사무소":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"짜장":10000,"짬뽕":10000,"탕수육":10000}},"자금성":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"짜장":10000,"짬뽕":10000,"탕수육":10000}}},"일식":{"홍대개미":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"스테이크":10000,"연어":10000,"반반":10000}},"오성초밥":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"모듬":10000,"특급":10000,"스페셜":10000}},"덮덮밥":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"차돌":10000,"항정살":10000,"살치살":10000}}}}
-            //var _foodstorelist = @ViewBag.foodAppData;
-
         var currentCountryId = 0;
         var currentStoreId = 0;
         var currentStoreJson;
@@ -71,14 +65,38 @@
             console.log(countryListJson);
             $("#countrylist").html("");
             $.each(countryListJson, function (index, nation) {
-                $("#countrylist").append('<li><div onclick="getStoreList(\'' + countryListJson[index]["IDX"] + '\')">' + countryListJson[index]["COUNTRY_KOR_NAME"] + '</div></li>');
+                /*$("#countrylist").append('<li><div onclick="getStoreList(\'' + countryListJson[index]["IDX"] + '\')">' + countryListJson[index]["COUNTRY_KOR_NAME"] + '</div></li>');*/
+                $("#countrylist").append('<li><div onclick="getStoreList(this)" country_id="' + countryListJson[index]["IDX"] + '">' + countryListJson[index]["COUNTRY_KOR_NAME"] + '</div></li>');
             });
         }
 
-        function getStoreList(id) {
+        //function getStoreList(id) {
+        //    // json 형식으로 데이터 set
+        //    var params = {
+        //        countryId : id
+        //    }
+
+        //    // ajax 통신
+        //    $.ajax({
+        //        type: "POST",            // HTTP method type(GET, POST) 형식이다.
+        //        url: "/Food/GetStoreList",      // 컨트롤러에서 대기중인 URL 주소이다.
+        //        data: params,            // Json 형식의 데이터이다.
+        //        success: function (res) { // 비동기통신의 성공일경우 success콜백으로 들어옵니다. 'res'는 응답받은 데이터이다.
+        //            // 응답코드 > 0000
+        //            console.log("success");
+        //            var storeJson = JSON.parse(res);
+        //            storePageSet(storeJson, id)
+        //        },
+        //        error: function (XMLHttpRequest, textStatus, errorThrown) { // 비동기 통신이 실패할경우 error 콜백으로 들어옵니다.
+        //            alert("통신 실패.")
+        //        }
+        //    });
+        //}
+        function getStoreList($this) {
             // json 형식으로 데이터 set
+            var id = $($this).attr("country_id");
             var params = {
-                countryId : id
+                countryId: id
             }
 
             // ajax 통신
@@ -107,26 +125,27 @@
 
             $("#storelist").html("");
             $.each(storeListJson, function (index, store) {
-                $("#storelist").append('<li><div onclick="getStoreDetail(\'' + storeListJson[index]["IDX"] + '\')">' + storeListJson[index]["STORE_KOR_NAME"] + '</div></li>');
+                /*$("#storelist").append('<li><div onclick="getStoreDetail(\'' + storeListJson[index]["IDX"] + '\')">' + storeListJson[index]["STORE_KOR_NAME"] + '</div></li>');*/
+                $("#storelist").append('<li><div onclick="getStoreDetail(this)" store_id = "' + storeListJson[index]["IDX"] + '">' + storeListJson[index]["STORE_KOR_NAME"] + '</div></li>');
             });
 
             $("#store ul").show();
             depth = 2;
         }
 
-        function getStoreDetail(id) {
+        function getStoreDetail($this) {
+            var id = $($this).attr("store_id");
             console.log(id);
             console.log(currentCountryId);
             // json 형식으로 데이터 set
             var params = {
-                countryId: currentCountryId,
                 storeId: id
             }
 
             // ajax 통신
             $.ajax({
                 type: "POST",            // HTTP method type(GET, POST) 형식이다.
-                url: "/Food/GetStoreDetail",      // 컨트롤러에서 대기중인 URL 주소이다.
+                url: "/Food/GetStoreDetailJoin",      // 컨트롤러에서 대기중인 URL 주소이다.
                 data: params,            // Json 형식의 데이터이다.
                 success: function (res) { // 비동기통신의 성공일경우 success콜백으로 들어옵니다. 'res'는 응답받은 데이터이다.
                     // 응답코드 > 0000
@@ -168,7 +187,8 @@
             $.each(food, function (index, foodDetail) {
                 var foodName = food[index]["FOOD_KOR_NAME"];
                 var foodPrice = food[index]["FOOD_PRICE"];
-                $("#foodlist").append('<li onclick="food(\'' + foodName + '\',\'' + foodPrice + '\')"><div>' + foodName + ' ' + foodPrice + '</div></li>');
+                /*$("#foodlist").append('<li onclick="food(\'' + foodName + '\',\'' + foodPrice + '\')"><div>' + foodName + ' ' + foodPrice + '</div></li>');*/
+                $("#foodlist").append('<li onclick="food(this)" foodName="' + foodName + '" foodPrice="' + foodPrice + '"><div>' + foodName + ' ' + foodPrice + '</div></li>');
             });
 
             $("#store").hide();
@@ -179,8 +199,10 @@
 
             var foodlist = ""; //문자
             var totalprice = 0; //숫자
-            function food(name, price)
+            function food($this)
             {
+                var name = $($this).attr("foodName");
+                var price = $($this).attr("foodPrice");
                 foodlist = foodlist + name + "(" + price + ")";
                 $("#select").html(foodlist);
             }

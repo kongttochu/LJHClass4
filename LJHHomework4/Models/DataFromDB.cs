@@ -110,5 +110,46 @@ namespace LJHHomework2.Models
             
             return list;
         }
+
+        public STORE GetStoreJoin(int storeId)
+        {
+            dbconn dbconn = new dbconn();
+            string queryString = string.Format("EXEC USP_GETSTOREANDDETAIL {0}", storeId);
+            var data = dbconn.ConnectDB(queryString);
+
+            STORE store = new STORE();
+            List<FOOD_DETAIL> list = new List<FOOD_DETAIL>();
+
+            DateTime dt = DateTime.Now;
+            while (data.Read())
+            {
+                store.IDX = (int)data["IDX"];
+                store.STORE_KOR_NAME = data["STORE_KOR_NAME"].ToString();
+                store.STORE_DELIVERY_TIP = data["STORE_DELIVERY_TIP"].ToString();
+                store.STORE_DELIVERY_MIN_TIME = data["STORE_DELIVERY_MIN_TIME"].ToString();
+                store.STORE_DELIVERY_MAX_TIME = data["STORE_DELIVERY_MAX_TIME"].ToString();
+                store.STORE_RATING = (int)data["STORE_RATING"];
+                store.REGDATE = DateTime.TryParse(data["REGDATE"].ToString(), out dt) ? dt : DateTime.Now;
+                store.REGID = data["REGID"].ToString();
+                store.UPDDATE = DateTime.TryParse(data["UPDDATE"].ToString(), out dt) ? dt : DateTime.Now;
+                store.UPDID = data["UPDID"].ToString();
+                store.ISUSE = data["ISUSE"] == "Y" ? true : false;
+                store.FoodDetailList = GetFoodDetail(storeId);
+
+                list.Add(new FOOD_DETAIL
+                {
+                    IDX = (int)data["IDX"],
+                    STORE_IDX = (int)data["STORE_IDX"],
+                    FOOD_KOR_NAME = data["FOOD_KOR_NAME"].ToString(),
+                    FOOD_PRICE = (int)data["FOOD_PRICE"],
+                    REGDATE = DateTime.TryParse(data["REGDATE"].ToString(), out dt) ? dt : DateTime.Now,
+                    REGID = data["REGID"].ToString(),
+                    UPDDATE = DateTime.TryParse(data["UPDDATE"].ToString(), out dt) ? dt : DateTime.Now,
+                    UPDID = data["UPDID"].ToString(),
+                    ISUSE = data["ISUSE"] == "Y" ? true : false
+                });
+            }
+            return store;
+        }
     }
 }
