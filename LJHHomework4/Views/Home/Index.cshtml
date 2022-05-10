@@ -1,0 +1,58 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<script>
+    $(function () {
+
+        $('#send').click(function () {
+
+            $.ajax({
+
+                type: "GET",
+
+                url: "test.json",
+
+                data: {
+                    username: $("#username").val(), content: $("#content").val()
+                },
+
+                dataType: "jsonp",
+                async: true,
+                success: function (data) {
+
+                }
+
+            });
+
+        });
+    });
+
+    $.ajax({
+        url: "Food/JsonpCall",
+        data: {
+            "id": "123"
+        },
+        dataType: "jsonp",
+        jsonp: "getFoodDetail", //jsonpCallback, Callback 동일 | 완료 후 해당 함수 바로 호출
+        success: function (data) { // 작동안함 success, error
+        }
+    });
+
+    function getFoodDetail() {
+
+    }
+
+    function test($this) {
+        var result = $($this).attr("country"); // 한식
+    }
+</script>
+
+<div onclick="test(this)" country="한식"> 
+    한식
+</div>

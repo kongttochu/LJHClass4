@@ -1,0 +1,253 @@
+﻿<html>
+<head>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <style>
+        ul {
+            list-style: none;
+        }
+
+        #main ul div, #store ul div, #food {
+            border: 1px solid black;
+            width: 100px;
+            padding: 25px;
+            float: left;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #store ul {
+            display: none;
+        }
+    </style>
+    <script>
+
+            //var _foodstorelist = '@Html.Raw(ViewBag.foodAppData)'
+            var _foodstorelist =
+            {"한식":{"원할머니보쌈":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"보쌈":10000,"족발":10000,"보족":10000}},"BBQ":{"tip":2000,"minTime":20,"maxTime":50,"score":5,"food":{"후라이드":10000,"양념":10000,"간장":10000}},"신전떡볶이":{"tip":2000,"minTime":30,"maxTime":40,"score":5,"food":{"떡볶이":10000,"오뎅":10000,"튀김":10000}}},"중식":{"홍콩반점":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"짜장":10000,"짬뽕":10000,"탕수육":10000}},"짜장면사무소":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"짜장":10000,"짬뽕":10000,"탕수육":10000}},"자금성":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"짜장":10000,"짬뽕":10000,"탕수육":10000}}},"일식":{"홍대개미":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"스테이크":10000,"연어":10000,"반반":10000}},"오성초밥":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"모듬":10000,"특급":10000,"스페셜":10000}},"덮덮밥":{"tip":3000,"minTime":30,"maxTime":50,"score":5,"food":{"차돌":10000,"항정살":10000,"살치살":10000}}}}
+            //var _foodstorelist = @ViewBag.foodAppData;
+
+        var currentCountryId = 0;
+        var currentStoreId = 0;
+        var currentStoreJson;
+        var depth = 1;
+
+        init();
+
+        function init() {
+            getCountryList();
+        }
+
+        function getCountryList() {
+            // json 형식으로 데이터 set
+            var params = {
+
+            }
+
+            // ajax 통신
+            $.ajax({
+                type: "POST",            // HTTP method type(GET, POST) 형식이다.
+                url: "/Food/GetCountryList",      // 컨트롤러에서 대기중인 URL 주소이다.
+                headers: {
+                    "My-First-Header": "first value",
+                    "My-Second-Header": "second value"
+                },
+                data: params,            // Json 형식의 데이터이다.
+                success: function (res) { // 비동기통신의 성공일경우 success콜백으로 들어옵니다. 'res'는 응답받은 데이터이다.
+                    // 응답코드 > 0000
+                    //alert(res);
+                    console.log("success");
+                    var countryJson = JSON.parse(res);
+                    //console.log(json)
+                    countryPageSet(countryJson);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) { // 비동기 통신이 실패할경우 error 콜백으로 들어옵니다.
+                    alert("통신 실패.")
+                }
+            });
+        };
+
+        //<li><div onclick="main('일식')">일식</div></li>
+        function countryPageSet(countryListJson, id) {
+            console.log(countryListJson);
+            $("#countrylist").html("");
+            $.each(countryListJson, function (index, nation) {
+                $("#countrylist").append('<li><div onclick="getStoreList(\'' + countryListJson[index]["IDX"] + '\')">' + countryListJson[index]["COUNTRY_KOR_NAME"] + '</div></li>');
+            });
+        }
+
+        function getStoreList(id) {
+            // json 형식으로 데이터 set
+            var params = {
+                countryId : id
+            }
+
+            // ajax 통신
+            $.ajax({
+                type: "POST",            // HTTP method type(GET, POST) 형식이다.
+                url: "/Food/GetStoreList",      // 컨트롤러에서 대기중인 URL 주소이다.
+                data: params,            // Json 형식의 데이터이다.
+                success: function (res) { // 비동기통신의 성공일경우 success콜백으로 들어옵니다. 'res'는 응답받은 데이터이다.
+                    // 응답코드 > 0000
+                    console.log("success");
+                    var storeJson = JSON.parse(res);
+                    storePageSet(storeJson, id)
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) { // 비동기 통신이 실패할경우 error 콜백으로 들어옵니다.
+                    alert("통신 실패.")
+                }
+            });
+        }
+
+        function storePageSet(storeListJson, countryId) {
+            console.log(storeListJson)
+
+            currentCountryId = countryId;
+
+            $("#main").hide();// display: none
+
+            $("#storelist").html("");
+            $.each(storeListJson, function (index, store) {
+                $("#storelist").append('<li><div onclick="getStoreDetail(\'' + storeListJson[index]["IDX"] + '\')">' + storeListJson[index]["STORE_KOR_NAME"] + '</div></li>');
+            });
+
+            $("#store ul").show();
+            depth = 2;
+        }
+
+        function getStoreDetail(id) {
+            console.log(id);
+            console.log(currentCountryId);
+            // json 형식으로 데이터 set
+            var params = {
+                countryId: currentCountryId,
+                storeId: id
+            }
+
+            // ajax 통신
+            $.ajax({
+                type: "POST",            // HTTP method type(GET, POST) 형식이다.
+                url: "/Food/GetStoreDetail",      // 컨트롤러에서 대기중인 URL 주소이다.
+                data: params,            // Json 형식의 데이터이다.
+                success: function (res) { // 비동기통신의 성공일경우 success콜백으로 들어옵니다. 'res'는 응답받은 데이터이다.
+                    // 응답코드 > 0000
+                    console.log("success");
+                    var storeDetailJson = JSON.parse(res);
+                    foodDetailPageSet(storeDetailJson, id)
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) { // 비동기 통신이 실패할경우 error 콜백으로 들어옵니다.
+                    alert("통신 실패.")
+                }
+            });
+        }
+
+        function foodDetailPageSet(foodDetailListJson, storeId) {
+            currentStoreId = storeId;
+
+            var info = foodDetailListJson;
+            var tip = info["STORE_DELIVERY_TIP"].toString() + "원"; //불변값 .tip 가능
+            var time = info["STORE_DELIVERY_MIN_TIME"] + "~" + info["STORE_DELIVERY_MAX_TIME"] + "분";
+            //var time = info["time"];
+            var score = info["STORE_RATING"];
+            var food = info["FoodDetailList"];
+
+            var scoreText = "";
+            while (score > 0) {
+                scoreText += "*";
+                score -= 1;
+            }
+            $("#tip").text("배달료 : " + tip);
+            $("#time").text("배달시간 : " + time);
+            $("#score").text("별점 : " + scoreText);
+
+
+
+            // <li onclick="food('후라이드치킨', 19000)"><div>후라이드치킨 19,000원</div></li>
+            //     <li onclick="food('양념치킨', 20000)"><div>양념치킨 20,000원</div></li>
+
+            $("#foodlist").html("");
+            $.each(food, function (index, foodDetail) {
+                var foodName = food[index]["FOOD_KOR_NAME"];
+                var foodPrice = food[index]["FOOD_PRICE"];
+                $("#foodlist").append('<li onclick="food(\'' + foodName + '\',\'' + foodPrice + '\')"><div>' + foodName + ' ' + foodPrice + '</div></li>');
+            });
+
+            $("#store").hide();
+            $("#menu").show();
+
+            depth = 3;
+        }
+
+            var foodlist = ""; //문자
+            var totalprice = 0; //숫자
+            function food(name, price)
+            {
+                foodlist = foodlist + name + "(" + price + ")";
+                $("#select").html(foodlist);
+            }
+
+            function numberWithCommas(x) {
+                return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            function home(){
+                window.location.reload();
+            }
+
+            function back(){
+                //window.history.go(-1); //브라우저 뒤로가기
+                if(depth == 3){
+                    backinit();
+                    getStoreList(currentCountryId);
+                }
+                else if (depth == 2){
+                    home();
+                    depth = 1;
+                }
+            }
+
+            function backinit(){
+                $("#menu").hide();
+                $("#store").show();
+                $("#select").html("");
+                depth = 2;
+            }
+    </script>
+</head>
+<body>
+    <div>
+        <button onclick="home();">홈</button>
+        <button onclick="back();">뒤로가기</button>
+    </div>
+    <!--한식/중식/일식-->
+    <div id="main">
+        <ul id="countrylist">
+        </ul>
+    </div>
+    <!--음식점 선택-->
+            <div id="store">
+                <ul id="storelist"></ul>
+            </div>
+            <!--메뉴-->
+            <div id="menu" style="display: none;">
+                <h1 id="storename"></h1>
+                <div>
+                    <div id="tip">배달팁 : 3500원</div>
+                    <div id="time">배달소요시간 : 30~50분</div>
+                    <div id="score">별점 : *</div>
+                </div>
+                <h1>메뉴</h1>
+                <div id="food">
+                    <ul id="foodlist">
+                    </ul><div></div>
+                </div>
+                <br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+                <h1>선택한 메뉴</h1>
+                <div>
+                    <div id="select"></div>
+                    <div id="price"></div>
+                </div>
+            </div>
+
+</body>
+</html>
